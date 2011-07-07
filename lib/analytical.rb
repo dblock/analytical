@@ -18,7 +18,12 @@ module Analytical
     File.open("#{Rails.root}/config/analytical.yml") do |f|
       file_options = YAML::load(ERB.new(f.read).result).symbolize_keys
       env = (Rails.env || :production).to_sym
-      file_options = file_options[env] if file_options.has_key?(env)
+      if file_options.has_key?(env)
+        file_options = file_options[env]
+      else
+        # If the current environment has no config, disable analytical
+        config_options[:disable_if] = Proc.new { true }
+      end
       file_options.each do |k, v|
         config_options[k.to_sym] = v.symbolize_keys
         config_options[:modules] << k.to_sym unless options && options[:modules]
