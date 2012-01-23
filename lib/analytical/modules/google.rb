@@ -24,7 +24,7 @@ module Analytical
                 _gaq.push(['_setCustomVar', custom_variables[i].slot, custom_variables[i].key, custom_variables[i].value, custom_variables[i].scope ]);
               }
             }
-             _gaq.push(['_trackPageview']);
+            #_gaq.push(['_trackPageview']);
             (function() {
               var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
               ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
