@@ -8,15 +8,15 @@ describe "Analytical" do
       include Analytical::InstanceMethods
       include Analytical::BotDetector
       if ::Rails::VERSION::MAJOR < 3
-        class_inheritable_accessor :analytical_options
+        class_inheritable_accessor :analytical_config
       else
-        class_attribute :analytical_options
+        class_attribute :analytical_config
       end
 
       def self.helper_method(*a); end
       def request
-        RSpec::Mocks::Mock.new 'request', 
-          :'ssl?'=>true, 
+        RSpec::Mocks::Mock.new 'request',
+          :'ssl?'=>true,
           :user_agent=>'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2.3) Gecko/20100401 Firefox/3.6.3 GTB7.0'
       end
     end
@@ -47,7 +47,7 @@ describe "Analytical" do
       it 'should set the modules to []' do
         DummyForInit.analytical :disable_if => lambda { |x| true }
         d = DummyForInit.new
-        d.analytical.options[:modules].should == []        
+        d.analytical.options[:modules].should == []
       end
     end
 
@@ -71,15 +71,15 @@ describe "Analytical" do
     it 'should open the initialization file' do
       File.should_receive(:'exists?').with("#{Rails.root}/config/analytical.yml").and_return(true)
       DummyForInit.analytical
-      DummyForInit.analytical_options[:google].should == {:key=>'google_12345'}
-      DummyForInit.analytical_options[:kiss_metrics].should == {:key=>'kiss_metrics_12345'}
-      DummyForInit.analytical_options[:clicky].should == {:key=>'clicky_12345'}
-      DummyForInit.analytical_options[:chartbeat].should == {:key=>'chartbeat_12345', :domain => 'your.domain.com'}
+      DummyForInit.analytical_config[:google].should == {:key=>'google_12345'}
+      DummyForInit.analytical_config[:kiss_metrics].should == {:key=>'kiss_metrics_12345'}
+      DummyForInit.analytical_config[:clicky].should == {:key=>'clicky_12345'}
+      DummyForInit.analytical_config[:chartbeat].should == {:key=>'chartbeat_12345', :domain => 'your.domain.com'}
     end
 
     it 'should allow for module-specific controller overrides' do
       DummyForInit.analytical :google=>{:key=>'override_google_key'}
-      DummyForInit.analytical_options[:google].should == {:key=>'override_google_key'}
+      DummyForInit.analytical_config[:google].should == {:key=>'override_google_key'}
     end
 
     describe 'in production mode' do
