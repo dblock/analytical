@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 module Analytical
   module Modules
     class Google
@@ -17,7 +18,13 @@ module Analytical
             _gaq.push(['_setAccount', '#{options[:key]}']);
             _gaq.push(['_setDomainName', '#{options[:domain]}']);
             #{"_gaq.push(['_setAllowLinker', true]);" if options[:allow_linker]}
-            _gaq.push(['_trackPageview']);
+            #{"_gaq.push(['_trackPageLoadTime']);" if options[:track_page_load_time]}
+            if(typeof custom_variables !== 'undefined'){
+              for(var i = 0; i < custom_variables.length; i++) {
+                _gaq.push(['_setCustomVar', custom_variables[i].slot, custom_variables[i].key, custom_variables[i].value, custom_variables[i].scope ]);
+              }
+            }
+            #_gaq.push(['_trackPageview']);
             (function() {
               var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
               ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
@@ -29,22 +36,35 @@ module Analytical
         end
       end
 
+      # slot: 1-5 allowed
+      # key: String
+      # value: String
+      # scope: 1 (visitor-level), 2 (session-level), or 3 (page-level)
+      def custom_variable(slot, key, value, scope)
+        js = <<-HTML
+        <script type="text/javascript">
+          if (typeof window.custom_variables == 'undefined') window.custom_variables = [];
+          window.custom_variables.push({slot: #{slot}, key: '#{key}', value: '#{value}', scope: #{scope}});
+        </script>
+        HTML
+        js
+      end
+
       def track(*args)
         "_gaq.push(['_trackPageview'#{args.empty? ? ']' : ', "' + args.first + '"]'});"
       end
-      
+
       def event(name, *args)
         data = args.first || {}
         data = data[:value] if data.is_a?(Hash)
         data_string = !data.nil? ? ", #{data}" : ""
         "_gaq.push(['_trackEvent', \"Event\", \"#{name}\"" + data_string + "]);"
       end
-      
+
       def custom_event(category, action, opt_label=nil, opt_value=nil)
         args = [category, action, opt_label, opt_value].compact
         "_gaq.push(" + [ "_trackEvent", *args].to_json + ");"
       end
-
 
       # http://code.google.com/apis/analytics/docs/tracking/gaTrackingCustomVariables.html
       #
